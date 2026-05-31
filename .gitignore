@@ -1,0 +1,29 @@
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Firebase
+GoogleService-Info.plist
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+eval/icons/
+
+# macOS
+.DS_Store
+
+# Large video files
+*.mp4
+*.mov
+
+# Proxy secrets and cache
+proxy/.dev.vars
+proxy/wrangler.toml
+proxy/.wrangler/
