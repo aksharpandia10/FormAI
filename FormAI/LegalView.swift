@@ -109,7 +109,7 @@ struct TermsOfServiceView: View {
 
             LegalSection(
                 heading: "Contact",
-                text: "Questions about these Terms? Email us at support@getformai.app"
+                text: "Questions about these Terms? Email us at aksharformaitest@gmail.com"
             )
         }
     }
@@ -148,7 +148,7 @@ struct PrivacyPolicyView: View {
 
             LegalSection(
                 heading: "Your Rights",
-                text: "You can delete your form check history at any time within the app. To request full account and data deletion, contact us at support@getformai.app. We will process deletion requests within 30 days."
+                text: "You can delete your form check history at any time within the app. To request full account and data deletion, contact us at aksharformaitest@gmail.com. We will process deletion requests within 30 days."
             )
 
             LegalSection(
@@ -168,7 +168,7 @@ struct PrivacyPolicyView: View {
 
             LegalSection(
                 heading: "Contact",
-                text: "Questions about this Privacy Policy? Email us at support@getformai.app"
+                text: "Questions about this Privacy Policy? Email us at aksharformaitest@gmail.com"
             )
         }
     }
