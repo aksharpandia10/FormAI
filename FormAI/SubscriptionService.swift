@@ -5,7 +5,11 @@ import RevenueCat
 class SubscriptionService: ObservableObject {
     static let shared = SubscriptionService()
 
+    #if DEBUG
+    @Published var isSubscribed = true
+    #else
     @Published var isSubscribed = false
+    #endif
     @Published var isLoading = false
     @Published var offerings: Offerings?
 
@@ -17,20 +21,26 @@ class SubscriptionService: ObservableObject {
         Purchases.logLevel = .warn
         Purchases.configure(withAPIKey: "appl_eblRGQMrjQSODsnGBzRmYNjIocs")
         Task {
+            #if !DEBUG
             await checkEntitlement()
+            #endif
             await fetchOfferings()
         }
+        #if !DEBUG
         Task {
             for await customerInfo in Purchases.shared.customerInfoStream {
                 isSubscribed = customerInfo.entitlements[entitlementID]?.isActive == true
             }
         }
+        #endif
     }
 
     func checkEntitlement() async {
         do {
             let info = try await Purchases.shared.customerInfo()
+            #if !DEBUG
             isSubscribed = info.entitlements[entitlementID]?.isActive == true
+            #endif
         } catch {
             print("[RC] entitlement check failed: \(error)")
         }

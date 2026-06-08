@@ -10,6 +10,8 @@
 	<string>Form AI can save your workout recordings to your photo library.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Form AI saves your recorded workout videos to your photo library.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

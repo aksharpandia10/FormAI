@@ -33,12 +33,13 @@ class FormAnalysisService {
         let totalSeconds = CMTimeGetSeconds(duration)
         guard totalSeconds > 0 else { return FrameData(base64Frames: [], images: [], durationSeconds: 0) }
 
-        let count = min(10, max(1, Int(totalSeconds * 1.0)))
+        let cappedSeconds = min(totalSeconds, 15.0)
+        let count = min(15, max(1, Int(cappedSeconds * 1.0)))
 
         var base64Frames: [String] = []
         var images: [UIImage] = []
         for i in 0..<count {
-            let t = totalSeconds * Double(i) / Double(count - 1)
+            let t = cappedSeconds * Double(i) / Double(max(count - 1, 1))
             let time = CMTime(seconds: t, preferredTimescale: 600)
             if let cgImage = try? generator.copyCGImage(at: time, actualTime: nil) {
                 let resized = UIImage(cgImage: cgImage).resized(toWidth: 512)
@@ -60,7 +61,6 @@ class FormAnalysisService {
             onProgress?(p * 0.5)
         }
         guard !frameData.base64Frames.isEmpty else { throw FormAnalysisError.noFrames }
-        guard frameData.durationSeconds <= 15 else { throw FormAnalysisError.videoTooLong }
 
         let coachingContext = UserDefaults.standard.string(forKey: "ob_coachingContext") ?? ""
         let frameInterval = frameData.durationSeconds / Double(max(frameData.base64Frames.count - 1, 1))
@@ -106,17 +106,25 @@ class FormAnalysisService {
     }
 
     private func parseResult(_ text: String, exercise: Exercise) throws -> FormCheckEntry {
+        #if DEBUG
+        print("[FormAnalysis] Raw response:\n\(text)")
+        #endif
+
         var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Strip any markdown code fences (```json ... ``` or ``` ... ```)
+        // Strip markdown code fences — find closing ``` explicitly
         if cleaned.hasPrefix("```") {
-            let lines = cleaned.components(separatedBy: "\n")
-            cleaned = lines.dropFirst().dropLast().joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            let afterFence = cleaned.drop(while: { !$0.isNewline }).dropFirst()
+            if let closeRange = afterFence.range(of: "```") {
+                cleaned = String(afterFence[afterFence.startIndex..<closeRange.lowerBound])
+            } else {
+                cleaned = String(afterFence)
+            }
+            cleaned = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
-        // Extract the first JSON object if there's surrounding text
-        if !cleaned.hasPrefix("{"),
-           let start = cleaned.firstIndex(of: "{"),
+        // Extract first complete JSON object
+        if let start = cleaned.firstIndex(of: "{"),
            let end = cleaned.lastIndex(of: "}") {
             cleaned = String(cleaned[start...end])
         }
@@ -134,6 +142,9 @@ class FormAnalysisService {
                 summary: raw.summary
             )
         } catch {
+            #if DEBUG
+            print("[FormAnalysis] Decode error: \(error)\nCleaned JSON: \(cleaned)")
+            #endif
             throw FormAnalysisError.parseError
         }
     }
@@ -153,44 +164,6 @@ class FormAnalysisService {
 
     // MARK: - System prompt
 
-    private static let exerciseCues: [String: String] = [
-        "back squat": "depth (hip crease at or below knee), heels flat, knees tracking over toes, torso angle, hips and shoulders rising at the same rate out of the hole, bar position on back",
-        "front squat": "elbow height throughout, torso uprightness, depth, knees tracking over toes, elbows not dropping",
-        "bulgarian split squat": "front shin vertical at the bottom, front heel staying grounded, torso upright, rear knee descending toward floor",
-        "goblet squat": "torso uprightness, heels flat, depth, elbows inside knees at the bottom",
-        "deadlift": "spine neutral from setup to lockout, hips and shoulders rising at the same rate off the floor, bar staying close to body, standing tall at lockout without leaning back",
-        "conventional deadlift": "spine neutral from setup to lockout, hips and shoulders rising at the same rate off the floor, bar staying close to body, standing tall at lockout without leaning back",
-        "sumo deadlift": "knees pushing out over toes throughout, spine neutral, hips and shoulders rising together, upright torso at lockout",
-        "rdl": "knees staying at a fixed slight bend throughout — not bending more on the way down, hips hinging back not down, bar staying close to legs, full hip extension with glute squeeze at the top",
-        "romanian deadlift": "knees staying at a fixed slight bend throughout — not bending more on the way down, hips hinging back not down, bar staying close to legs, full hip extension with glute squeeze at the top",
-        "bench press": "bar touching mid-chest, elbows at 45-75 degrees not flared to 90, feet planted, butt on bench, full lockout at top",
-        "incline bench press": "elbows at 45-60 degrees not flared to 90, bar touching upper chest, scapular retraction, butt on bench",
-        "dumbbell bench press": "elbows at 45-75 degrees, full ROM at bottom, dumbbells nearly touching at top, butt on bench",
-        "overhead press": "glutes and core braced throughout, bar traveling vertically, no excessive lower back arch, full lockout with ears in front of arms",
-        "dips": "full lockout at top, controlled descent to parallel, elbows tracking back not flared wide, no kipping",
-        "pull-up": "full dead hang at the bottom with arms completely extended, initiating pull with lats not arms or shoulders, chin clearing the bar, no kipping or leg swing, controlled descent",
-        "chin-up": "full dead hang at the bottom with arms completely extended, initiating pull with lats not arms or shoulders, chin clearing the bar, no kipping or leg swing, controlled descent",
-        "lat pulldown": "full arm extension at the top, bar pulling to upper chest, elbows driving down and back, scapular depression before pulling, no excessive lean back",
-        "row": "torso angle consistent throughout, full arm extension at the bottom, pulling to lower chest or belly button, scapular retraction at the top, no body english or torso rising",
-        "hip thrust": "full hip extension at the top with glutes squeezed hard, bar over hip crease not stomach, shins vertical at the top, chin tucked",
-        "lateral raise": "arms raising directly out to the sides, leading with elbows not wrists, raising to shoulder height, controlled lowering, no torso swing",
-        "leg press": "depth at least to 90 degrees, back and glutes flat against pad throughout, knees tracking over toes, controlled descent",
-        "lunge": "front shin vertical at the bottom, front heel staying grounded, torso upright, rear knee descending toward floor",
-        "curl": "elbows pinned to sides throughout — not swinging forward, full extension at the bottom, no body swing or momentum",
-        "push-up": "rigid plank from head to heels with no hip sag or pike, elbows at roughly 45 degrees from torso, chest lowering to near the floor, full lockout at top, head neutral",
-        "plank": "straight line from head to heels, no hip sag or pike, core and glutes engaged, hips level",
-    ]
-
-    private func cueFor(exercise: Exercise) -> String {
-        let name = exercise.name.lowercased()
-        for (key, cue) in Self.exerciseCues {
-            if name.contains(key) || key.contains(name) {
-                return "\nKey things to assess: \(cue)."
-            }
-        }
-        return ""
-    }
-
     private func systemPrompt(exercise: Exercise, context: String) -> String {
         let contextLine = context.isEmpty ? "" : "\nClient context: \(context)\n"
         return """
@@ -200,23 +173,22 @@ class FormAnalysisService {
         Return ONLY this JSON — no markdown, no explanation:
         {
           "score": <integer 0-100>,
-          "didWell": [{"observation": "<what they did well>", "confidence": "<high|medium|low>"}],
-          "improve": [{"cue": "<one coaching fix>", "confidence": "<high|medium|low>"}],
+          "didWell": ["<observation 1>", "<observation 2>"],
+          "improve": ["<coaching cue 1>", "<coaching cue 2>"],
           "summary": "<one sentence summing it up>"
         }
         """
     }
 
+
     enum FormAnalysisError: LocalizedError {
         case noFrames
-        case videoTooLong
         case apiError(String)
         case parseError
 
         var errorDescription: String? {
             switch self {
             case .noFrames:          return "Could not extract frames from video."
-            case .videoTooLong:      return "Video is too long. Keep it under 15 seconds — just 1–2 reps is ideal."
             case .apiError(let m):   return friendlyError(m)
             case .parseError:        return "Could not read AI response."
             }

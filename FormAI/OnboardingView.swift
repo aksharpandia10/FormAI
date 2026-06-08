@@ -110,7 +110,27 @@ struct FormAIOnboardingView: View {
                 .id(step)
             }
         }
-        .onAppear { step = initialStep }
+        .onAppear { step = initialStep; AnalyticsService.onboardingStepViewed(step: initialStep, stepName: onboardingStepName(initialStep)) }
+        .onChange(of: step) { oldStep, newStep in
+            if newStep > oldStep {
+                AnalyticsService.onboardingStepViewed(step: newStep, stepName: onboardingStepName(newStep))
+            }
+        }
+    }
+
+    private func onboardingStepName(_ s: Int) -> String {
+        switch s {
+        case 0: return "gender"
+        case 1: return "training_frequency"
+        case 2: return "age"
+        case 3: return "heard_from"
+        case 4: return "tried_apps"
+        case 5: return "has_trainer"
+        case 6: return "stopping_points"
+        case 7: return "goals"
+        case 8: return "name"
+        default: return "unknown"
+        }
     }
 
     private var nameStep: some View {

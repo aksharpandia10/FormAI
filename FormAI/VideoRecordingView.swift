@@ -47,15 +47,6 @@ struct VideoRecordingView: View {
                     }
                     return
                 }
-                let asset = AVAsset(url: url)
-                let duration = (try? await asset.load(.duration)).map { CMTimeGetSeconds($0) } ?? 0
-                if duration > 15 {
-                    await MainActor.run {
-                        pickerItem = nil
-                        errorMessage = "Video is too long (\(Int(duration))s). Keep it under 15 seconds — just 1–2 reps is ideal."
-                    }
-                    return
-                }
                 withAnimation { isAnalyzing = true }
                 await analyze(videoURL: url)
             }
@@ -321,11 +312,27 @@ struct RecordingTipView: View {
     let exercise: Exercise
     let onStart: () -> Void
 
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 40, height: 40)
+                            .background(.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
                 Spacer()
 
                 VStack(spacing: 10) {
@@ -340,7 +347,7 @@ struct RecordingTipView: View {
                 Spacer().frame(height: 36)
 
                 VStack(spacing: 0) {
-                    TipRow(icon: "timer", text: "Keep it under 10 seconds")
+                    TipRow(icon: "timer", text: "Keep it under 15 seconds")
                     Divider().background(.white.opacity(0.1))
                     TipRow(icon: "arrow.triangle.2.circlepath", text: "Show 1–2 complete reps")
                     Divider().background(.white.opacity(0.1))

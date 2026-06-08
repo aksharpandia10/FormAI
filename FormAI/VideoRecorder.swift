@@ -5,7 +5,7 @@ class VideoRecorder: NSObject, ObservableObject {
     @Published var isRecording = false
     @Published var duration: TimeInterval = 0
     @Published var formattedDuration: String = "0:00"
-    @Published var isFrontCamera = true
+    @Published var isFrontCamera = false
 
     var onAutoStop: ((URL?) -> Void)?
     private let maxRecordingDuration: TimeInterval = 10
@@ -23,9 +23,9 @@ class VideoRecorder: NSObject, ObservableObject {
             session.beginConfiguration()
             session.sessionPreset = .high
 
-            // Video input — default front camera
+            // Video input — default rear camera
             guard
-                let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
+                let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
                 let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
                 session.canAddInput(videoInput)
             else {

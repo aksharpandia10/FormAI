@@ -3,6 +3,7 @@ import AVKit
 
 struct IntroView: View {
     let onGetStarted: () -> Void
+    var onAlreadyHaveAccount: (() -> Void)? = nil
     @State private var showContent = false
 
     var body: some View {
@@ -32,14 +33,29 @@ struct IntroView: View {
                 .opacity(showContent ? 1 : 0)
                 .animation(.easeIn(duration: 0.4).delay(0.25), value: showContent)
 
-                Button(action: onGetStarted) {
-                    Text("Get Started")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Theme.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                VStack(spacing: 16) {
+                    Button(action: onGetStarted) {
+                        Text("Get Started")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(Theme.primary)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                    }
+
+                    if let onAlreadyHaveAccount {
+                        Button(action: onAlreadyHaveAccount) {
+                            HStack(spacing: 4) {
+                                Text("Already have an account?")
+                                    .foregroundStyle(Theme.textSecondary)
+                                Text("Sign In")
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(Theme.textPrimary)
+                            }
+                            .font(.system(size: 14))
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 52)

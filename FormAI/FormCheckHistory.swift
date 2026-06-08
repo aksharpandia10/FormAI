@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-struct FormCheckEntry: Codable, Identifiable {
+struct FormCheckEntry: Codable, Identifiable, Hashable {
     var id: String = UUID().uuidString
     let exerciseId: String
     let exerciseName: String

@@ -3,6 +3,7 @@ import RevenueCatUI
 
 struct ExerciseDetailView: View {
     let exercise: Exercise
+    var source: String = "browse"
 
     @Environment(\.dismiss) private var dismiss
     @State private var history: [FormCheckEntry] = []
@@ -12,107 +13,44 @@ struct ExerciseDetailView: View {
     @State private var historyExpanded = true
     @State private var historyLoadFailed = false
     @State private var showRecordingTip = false
+    @State private var selectedHistoryEntry: FormCheckEntry? = nil
+    @State private var showHistoryResult = false
     @StateObject private var sub = SubscriptionService.shared
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
 
-                HStack(spacing: 16) {
-                    Image(exercise.imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 72, height: 72)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            chip(exercise.equipment, color: Theme.primary)
-                            chip("\(exercise.cameraAngle.rawValue) cam", color: Theme.textSecondary)
-                        }
-                    }
+                // Metadata tags
+                HStack(spacing: 8) {
+                    chip(exercise.equipment, color: Theme.primary)
+                    chip("\(exercise.cameraAngle.rawValue) cam", color: Theme.textSecondary)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 8)
-
-                Text(exercise.description)
-                    .font(.system(size: 15))
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.horizontal, 24)
-
-                // Instructions card
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("HOW TO PERFORM")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Theme.textSecondary)
-                        .kerning(0.5)
-                        .padding(.horizontal, 18)
-                        .padding(.top, 16)
-                        .padding(.bottom, 12)
-                    ForEach(Array(exercise.instructions.enumerated()), id: \.offset) { i, step in
-                        HStack(alignment: .top, spacing: 12) {
-                            Text("\(i + 1)")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Theme.primary)
-                                .frame(width: 20)
-                            Text(step)
-                                .font(.system(size: 14))
-                                .foregroundStyle(Theme.textPrimary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.bottom, 12)
-                    }
-                    .padding(.bottom, 4)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.cardBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-                .padding(.horizontal, 24)
-
-                // Tutorial
-                Button { showTutorial = true } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 38, height: 38)
-                            .background(Color.red)
-                            .clipShape(Circle())
-                        Text("Watch Tutorial")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(Theme.textPrimary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(Theme.textSecondary)
-                    }
-                    .padding(16)
-                    .background(Theme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 24)
+                .padding(.top, 4)
 
                 // Check Form CTA
                 Button {
+                    AnalyticsService.formCheckTapped(exerciseId: exercise.id, exerciseName: exercise.name)
                     if sub.isSubscribed { showRecordingTip = true }
                     else { showPaywall = true; AnalyticsService.paywallShown(source: "exercise_detail") }
                 } label: {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 10) {
                         Image(systemName: "video.fill")
+                            .font(.system(size: 15, weight: .semibold))
                         Text("Check My Form")
                             .font(.system(size: 17, weight: .semibold))
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
+                    .padding(.vertical, 16)
                     .background(Theme.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 4)
 
+                // Past Analyses
                 if !history.isEmpty {
                     historySection
                 } else if historyLoadFailed {
@@ -131,7 +69,60 @@ struct ExerciseDetailView: View {
                     .padding(.horizontal, 24)
                 }
 
-                Color.clear.frame(height: 20)
+                // Watch Tutorial
+                Button { showTutorial = true } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(Theme.textSecondary)
+                        Text("Watch Tutorial")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Theme.textSecondary.opacity(0.6))
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 14)
+                    .background(Theme.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 24)
+
+                // How to Perform
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("HOW TO PERFORM")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .kerning(0.8)
+                        .padding(.horizontal, 18)
+                        .padding(.top, 16)
+                        .padding(.bottom, 14)
+                    ForEach(Array(exercise.instructions.enumerated()), id: \.offset) { i, step in
+                        HStack(alignment: .top, spacing: 14) {
+                            Text("\(i + 1)")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Theme.primary)
+                                .frame(width: 22, height: 22)
+                                .background(Theme.primary.opacity(0.1))
+                                .clipShape(Circle())
+                            Text(step)
+                                .font(.system(size: 14))
+                                .foregroundStyle(Theme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 14)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .padding(.horizontal, 24)
+
+                Color.clear.frame(height: 24)
             }
         }
         .background(Theme.background.ignoresSafeArea())
@@ -153,13 +144,24 @@ struct ExerciseDetailView: View {
         .navigationDestination(isPresented: $navigateToRecording) {
             VideoRecordingView(exercise: exercise)
         }
+        .navigationDestination(isPresented: $showHistoryResult) {
+            if let entry = selectedHistoryEntry {
+                FormCheckResultView(
+                    result: FormCheckResult(exercise: exercise, entry: entry),
+                    skipSave: true,
+                    onDone: { }
+                )
+            }
+        }
         .sheet(isPresented: $showPaywall) {
             RevenueCatUI.PaywallView()
         }
         .fullScreenCover(isPresented: $showRecordingTip) {
             RecordingTipView(exercise: exercise) {
                 showRecordingTip = false
-                navigateToRecording = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    navigateToRecording = true
+                }
             }
         }
         .onChange(of: sub.isSubscribed) { _, isSubscribed in
@@ -170,7 +172,7 @@ struct ExerciseDetailView: View {
         }
         .task {
             await loadHistory()
-            AnalyticsService.exerciseOpened(id: exercise.id, name: exercise.name)
+            AnalyticsService.exerciseOpened(id: exercise.id, name: exercise.name, source: source)
         }
     }
 
@@ -193,17 +195,20 @@ struct ExerciseDetailView: View {
                     historyExpanded.toggle()
                 }
             } label: {
-                HStack {
+                HStack(spacing: 12) {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Theme.textSecondary)
                     Text("Past Analyses")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(Theme.textPrimary)
                     Spacer()
                     Text("\(history.count)")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Theme.textSecondary)
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Theme.textSecondary)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Theme.textSecondary.opacity(0.6))
                         .rotationEffect(.degrees(historyExpanded ? 180 : 0))
                 }
                 .padding(18)
@@ -223,11 +228,10 @@ struct ExerciseDetailView: View {
                 VStack(spacing: 0) {
                     Divider()
                     ForEach(history.prefix(5)) { entry in
-                        NavigationLink(destination: FormCheckResultView(
-                            result: FormCheckResult(exercise: exercise, entry: entry),
-                            skipSave: true,
-                            onDone: { }
-                        )) {
+                        Button {
+                            selectedHistoryEntry = entry
+                            showHistoryResult = true
+                        } label: {
                             HStack(spacing: 14) {
                                 ZStack {
                                     Circle()

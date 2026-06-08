@@ -171,22 +171,31 @@ struct FormCheckResultView: View {
             guard !didSave else { return }
             didSave = true
             if !skipSave { try? await FormCheckHistoryService.shared.save(result.entry) }
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15)) {
-                animateScore = true
-            }
-            // Count up score
-            let target = result.entry.score
-            let steps = 30
-            for i in 1...steps {
-                try? await Task.sleep(nanoseconds: 20_000_000)
-                await MainActor.run {
-                    displayedScore = Int(Double(target) * Double(i) / Double(steps))
+
+            if skipSave {
+                // History replay: show score immediately, just animate the ring
+                displayedScore = result.entry.score
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15)) {
+                    animateScore = true
                 }
-            }
-            if result.entry.score >= 80 {
-                showConfetti = true
-                try? await Task.sleep(nanoseconds: 2_500_000_000)
-                showConfetti = false
+            } else {
+                // New result: count-up animation
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15)) {
+                    animateScore = true
+                }
+                let target = result.entry.score
+                let steps = 30
+                for i in 1...steps {
+                    try? await Task.sleep(nanoseconds: 20_000_000)
+                    await MainActor.run {
+                        displayedScore = Int(Double(target) * Double(i) / Double(steps))
+                    }
+                }
+                if result.entry.score >= 80 {
+                    showConfetti = true
+                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                    showConfetti = false
+                }
             }
         }
     }

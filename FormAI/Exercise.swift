@@ -47,7 +47,7 @@ enum CameraAngle: String {
     case either = "Either"
 }
 
-struct Exercise: Identifiable {
+struct Exercise: Identifiable, Hashable {
     let id: String
     let name: String
     let category: ExerciseCategory

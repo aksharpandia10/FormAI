@@ -138,7 +138,7 @@ struct PrivacyPolicyView: View {
 
             LegalSection(
                 heading: "Third-Party Services",
-                text: "• Firebase (Google) — authentication and cloud database (Firestore). Subject to Google's Privacy Policy.\n\n• RevenueCat — subscription management and purchase verification. Subject to RevenueCat's Privacy Policy.\n\n• Anthropic (via our secure proxy) — AI analysis of video frames. Frames are sent over HTTPS, processed in real-time, and not retained.\n\n• YouTube Data API — used to fetch relevant exercise tutorial videos. No personal data is shared with YouTube for this purpose.\n\n• Apple / Google Sign-In — used for authentication only. We receive your email and name; your password is never shared with us."
+                text: "• Firebase (Google) — authentication and cloud database (Firestore). Subject to Google's Privacy Policy.\n\n• RevenueCat — subscription management and purchase verification. Subject to RevenueCat's Privacy Policy.\n\n• Google Gemini (via our secure proxy) — AI analysis of video frames. Frames are sent over HTTPS, processed in real-time, and not retained.\n\n• YouTube Data API — used to fetch relevant exercise tutorial videos. No personal data is shared with YouTube for this purpose.\n\n• Apple / Google Sign-In — used for authentication only. We receive your email and name; your password is never shared with us."
             )
 
             LegalSection(

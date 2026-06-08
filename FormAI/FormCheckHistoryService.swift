@@ -37,7 +37,10 @@ class FormCheckHistoryService: ObservableObject {
             .order(by: "timestamp", descending: true)
             .limit(to: 20)
             .getDocuments()
-        let entries = snap.documents.compactMap { try? $0.data(as: FormCheckEntry.self) }
+        let docs = snap.documents
+        let entries = await Task.detached(priority: .userInitiated) {
+            docs.compactMap { try? $0.data(as: FormCheckEntry.self) }
+        }.value
         let others = cache.filter { $0.exerciseId != exerciseId }
         cache = entries + others
         return entries
@@ -55,6 +58,9 @@ class FormCheckHistoryService: ObservableObject {
             .order(by: "timestamp", descending: true)
             .limit(to: 50)
             .getDocuments()
-        return snap.documents.compactMap { try? $0.data(as: FormCheckEntry.self) }
+        let docs = snap.documents
+        return await Task.detached(priority: .userInitiated) {
+            docs.compactMap { try? $0.data(as: FormCheckEntry.self) }
+        }.value
     }
 }

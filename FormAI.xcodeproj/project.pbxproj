@@ -39,6 +39,7 @@
 		BB2C3D4E2FB2000000BBCCDD /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */; };
 		AA1B2C3D2FB1000000AABBCC /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */; };
 		CC3D4E5F2FC3000000CCDDEE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC3D4E602FC3000000CCDDEE /* PrivacyInfo.xcprivacy */; };
+		DD4E5F602FC4000000DDEEFF /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DD4E5F612FC4000000DDEEFF /* Products.storekit */; };
 		FF1A1A092FB0000000FFAABB /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0A2FB0000000FFAABB /* SubscriptionService.swift */; };
 		FF1A1A0B2FB0000000FFAABB /* SaveProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0C2FB0000000FFAABB /* SaveProgressView.swift */; };
 		FF1A1A0D2FB0000000FFAABB /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0E2FB0000000FFAABB /* PaywallView.swift */; };
@@ -98,6 +99,7 @@
 		BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		CC3D4E602FC3000000CCDDEE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DD4E5F612FC4000000DDEEFF /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		FF1A1A0A2FB0000000FFAABB /* SubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionService.swift; sourceTree = "<group>"; };
 		FF1A1A0C2FB0000000FFAABB /* SaveProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveProgressView.swift; sourceTree = "<group>"; };
 		FF1A1A0E2FB0000000FFAABB /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */,
 				AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */,
 				CC3D4E602FC3000000CCDDEE /* PrivacyInfo.xcprivacy */,
+				DD4E5F612FC4000000DDEEFF /* Products.storekit */,
 				FF1A1A0A2FB0000000FFAABB /* SubscriptionService.swift */,
 				FF1A1A0C2FB0000000FFAABB /* SaveProgressView.swift */,
 				FF1A1A0E2FB0000000FFAABB /* PaywallView.swift */,

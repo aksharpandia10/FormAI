@@ -4,6 +4,7 @@ struct ExerciseHomeView: View {
     var onSignOut: (() -> Void)? = nil
     @StateObject private var auth = AuthService.shared
     @State private var searchText = ""
+    @State private var showSettings = false
     private var searchResults: [Exercise] {
         guard !searchText.isEmpty else { return [] }
         let q = searchText.lowercased()
@@ -26,8 +27,22 @@ struct ExerciseHomeView: View {
                 }
             }
             .background(Theme.background.ignoresSafeArea())
+            .navigationDestination(for: ExerciseCategory.self) { cat in
+                ExerciseCategoryView(category: cat)
+            }
+            .navigationDestination(for: Exercise.self) { exercise in
+                ExerciseDetailView(exercise: exercise)
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                FormAISettingsView(onSignOut: onSignOut)
+            }
         }
         .task { await FormCheckHistoryService.shared.prefetch() }
+        .onChange(of: searchText) { oldValue, newValue in
+            if oldValue.isEmpty && !newValue.isEmpty {
+                AnalyticsService.searchStarted()
+            }
+        }
     }
 
     // MARK: - Header
@@ -43,7 +58,7 @@ struct ExerciseHomeView: View {
                     .foregroundStyle(Theme.textSecondary)
             }
             Spacer()
-            NavigationLink(destination: FormAISettingsView(onSignOut: onSignOut)) {
+            Button { showSettings = true } label: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 18))
                     .foregroundStyle(Theme.textPrimary)
@@ -83,10 +98,13 @@ struct ExerciseHomeView: View {
             VStack(spacing: 12) {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(ExerciseCategory.allCases) { cat in
-                        NavigationLink(destination: ExerciseCategoryView(category: cat)) {
+                        NavigationLink(value: cat) {
                             CategoryTile(category: cat)
                         }
                         .buttonStyle(.plain)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            AnalyticsService.categoryTapped(category: cat.rawValue)
+                        })
                     }
                 }
             }
@@ -101,10 +119,13 @@ struct ExerciseHomeView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(searchResults) { exercise in
-                    NavigationLink(destination: ExerciseDetailView(exercise: exercise)) {
+                    NavigationLink(value: exercise) {
                         ExerciseRow(exercise: exercise)
                     }
                     .buttonStyle(.plain)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        AnalyticsService.searchResultTapped(query: searchText, exerciseId: exercise.id, exerciseName: exercise.name)
+                    })
                     if exercise.id != searchResults.last?.id {
                         Divider().padding(.leading, 24)
                     }
@@ -125,7 +146,7 @@ struct CategoryTile: View {
     let category: ExerciseCategory
 
     private var count: Int {
-        ExerciseLibrary.all.filter { $0.category == category }.count
+        ExerciseLibrary.countByCategory[category] ?? 0
     }
 
     var body: some View {
@@ -233,7 +254,7 @@ struct ExerciseCategoryView: View {
     let category: ExerciseCategory
 
     private var exercises: [Exercise] {
-        ExerciseLibrary.all.filter { $0.category == category }
+        ExerciseLibrary.byCategory[category] ?? []
     }
 
     var body: some View {
@@ -247,7 +268,7 @@ struct ExerciseCategoryView: View {
 
                 LazyVStack(spacing: 0) {
                     ForEach(exercises) { exercise in
-                        NavigationLink(destination: ExerciseDetailView(exercise: exercise)) {
+                        NavigationLink(value: exercise) {
                             ExerciseRow(exercise: exercise)
                         }
                         .buttonStyle(.plain)
@@ -266,6 +287,23 @@ struct ExerciseCategoryView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                BackButton()
+            }
+        }
+    }
+}
+
+private struct BackButton: View {
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        Button { dismiss() } label: {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Theme.textPrimary)
+        }
     }
 }
 

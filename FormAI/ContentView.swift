@@ -13,6 +13,7 @@ struct ContentView: View {
     @StateObject private var auth = AuthService.shared
     @State private var appState: AppState = .loading
     @State private var onboardingReturnStep = 0
+    @State private var showSignInSheet = false
 
     private var hasCompletedOnboarding: Bool {
         UserDefaults.standard.bool(forKey: "formAI_hasCompletedOnboarding")
@@ -28,8 +29,23 @@ struct ContentView: View {
                 }
 
             case .intro:
-                IntroView {
+                IntroView(onGetStarted: {
                     withAnimation(.easeInOut(duration: 0.4)) { appState = .onboarding }
+                }, onAlreadyHaveAccount: {
+                    showSignInSheet = true
+                })
+                .sheet(isPresented: $showSignInSheet) {
+                    SignInSheet(
+                        onSignedIn: {
+                            showSignInSheet = false
+                            UserDefaults.standard.set(true, forKey: "formAI_hasCompletedOnboarding")
+                            withAnimation(.easeInOut(duration: 0.4)) { appState = .launching }
+                        },
+                        onDismiss: { showSignInSheet = false }
+                    )
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
+                    .presentationBackground(Theme.background)
                 }
 
             case .onboarding:

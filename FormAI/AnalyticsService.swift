@@ -13,8 +13,27 @@ enum AnalyticsService {
         Analytics.logEvent("sign_in_skipped", parameters: nil)
     }
 
-    static func exerciseOpened(id: String, name: String) {
-        Analytics.logEvent("exercise_opened", parameters: ["exercise_id": id, "exercise_name": name])
+    static func onboardingStepViewed(step: Int, stepName: String) {
+        Analytics.logEvent("onboarding_step_viewed", parameters: ["step": step, "step_name": stepName])
+    }
+
+    static func exerciseOpened(id: String, name: String, source: String) {
+        Analytics.logEvent("exercise_opened", parameters: [
+            "exercise_id": id,
+            "exercise_name": name,
+            "source": source
+        ])
+    }
+
+    static func categoryTapped(category: String) {
+        Analytics.logEvent("category_tapped", parameters: ["category": category])
+    }
+
+    static func formCheckTapped(exerciseId: String, exerciseName: String) {
+        Analytics.logEvent("form_check_tapped", parameters: [
+            "exercise_id": exerciseId,
+            "exercise_name": exerciseName
+        ])
     }
 
     static func formCheckStarted(exerciseId: String, exerciseName: String) {
@@ -26,6 +45,18 @@ enum AnalyticsService {
             "exercise_id": exerciseId,
             "exercise_name": exerciseName,
             "score": score
+        ])
+    }
+
+    static func searchStarted() {
+        Analytics.logEvent("search_started", parameters: nil)
+    }
+
+    static func searchResultTapped(query: String, exerciseId: String, exerciseName: String) {
+        Analytics.logEvent("search_result_tapped", parameters: [
+            "query": query,
+            "exercise_id": exerciseId,
+            "exercise_name": exerciseName
         ])
     }
 

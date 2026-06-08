@@ -3,6 +3,9 @@ import Foundation
 struct ExerciseLibrary {
     static let all: [Exercise] = bigThree + squatVariations + deadliftVariations + push + pull + legs + core + bodyweight
 
+    static let byCategory: [ExerciseCategory: [Exercise]] = Dictionary(grouping: all, by: \.category)
+    static let countByCategory: [ExerciseCategory: Int] = byCategory.mapValues(\.count)
+
     static let bigThree: [Exercise] = [
         Exercise(id: "back_squat", name: "Back Squat", category: .bigThree,
                  muscleGroups: ["Quads", "Glutes", "Hamstrings", "Core"],

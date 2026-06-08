@@ -65,7 +65,6 @@ export default {
       contents: [{ role: "user", parts }],
       generationConfig: {
         maxOutputTokens: 2048,
-        thinkingConfig: { thinkingBudget: -1 },
       },
     };
 

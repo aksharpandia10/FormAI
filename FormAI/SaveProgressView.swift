@@ -5,6 +5,7 @@ struct SaveProgressView: View {
     let onSignedIn: () -> Void
     let onSkip: () -> Void
     let onBack: () -> Void
+    var isReturningUser: Bool = false
 
     @StateObject private var auth = AuthService.shared
     @State private var isLoadingGoogle = false
@@ -34,22 +35,24 @@ struct SaveProgressView: View {
                         Spacer()
                     }
 
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(Theme.cardBackground).frame(height: 4)
-                            Capsule().fill(Theme.primary).frame(width: geo.size.width * 0.85, height: 4)
+                    if !isReturningUser {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Theme.cardBackground).frame(height: 4)
+                                Capsule().fill(Theme.primary).frame(width: geo.size.width * 0.85, height: 4)
+                            }
                         }
+                        .frame(height: 4)
                     }
-                    .frame(height: 4)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Save your progress")
+                    Text(isReturningUser ? "Welcome back" : "Save your progress")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
-                    Text("Sign in to keep your plan and track progress across devices.")
+                    Text(isReturningUser ? "Sign in to pick up where you left off." : "Sign in to keep your plan and track progress across devices.")
                         .font(.system(size: 15))
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -153,14 +156,6 @@ struct SaveProgressView: View {
                         }
                     }
 
-                    Button(action: onSkip) {
-                        Text("Skip for now")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Theme.textSecondary)
-                            .underline()
-                    }
-                    .padding(.top, 2)
-                    .frame(maxWidth: .infinity)
                 }
                 .padding(.bottom, 48)
             }
@@ -284,6 +279,168 @@ struct GoogleGLogo: View {
             context.fill(Path(barRect), with: .color(blue))
         }
         .frame(width: size, height: size)
+    }
+}
+
+// MARK: - Compact Sign-In Sheet (returning users)
+
+struct SignInSheet: View {
+    let onSignedIn: () -> Void
+    let onDismiss: () -> Void
+
+    @StateObject private var auth = AuthService.shared
+    @State private var isLoadingGoogle = false
+    @State private var isLoadingApple = false
+    @State private var errorMessage: String?
+    @State private var appleCoordinator: AppleSignInCoordinator?
+    @State private var showTerms = false
+    @State private var showPrivacy = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Text("Sign In")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(maxWidth: .infinity)
+
+                HStack {
+                    Spacer()
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                            .frame(width: 28, height: 28)
+                            .background(Theme.cardBackground)
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(.top, 20)
+            .padding(.bottom, 24)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+            }
+
+            // Apple
+            Button { triggerAppleSignIn() } label: {
+                ZStack {
+                    if isLoadingApple { ProgressView().tint(.white) }
+                    else {
+                        HStack(spacing: 10) {
+                            Image(systemName: "apple.logo")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                            Text("Continue with Apple")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity).frame(height: 52)
+                .background(Color.black)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .disabled(isLoadingApple || isLoadingGoogle)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 12)
+
+            // Google
+            Button {
+                isLoadingGoogle = true; errorMessage = nil
+                Task {
+                    do {
+                        try await auth.signInWithGoogle()
+                        isLoadingGoogle = false
+                        AnalyticsService.signIn(method: "google")
+                        onSignedIn()
+                    } catch {
+                        isLoadingGoogle = false
+                        let nsError = error as NSError
+                        if nsError.code != 1 { errorMessage = error.localizedDescription }
+                    }
+                }
+            } label: {
+                ZStack {
+                    if isLoadingGoogle { ProgressView().tint(Theme.textPrimary) }
+                    else {
+                        HStack(spacing: 10) {
+                            GoogleGLogo(size: 18)
+                            Text("Continue with Google")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(Theme.textPrimary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity).frame(height: 52)
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.textSecondary.opacity(0.25), lineWidth: 1))
+            }
+            .disabled(isLoadingApple || isLoadingGoogle)
+            .padding(.horizontal, 24)
+
+            VStack(spacing: 2) {
+                Text("By continuing you agree to our")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                HStack(spacing: 4) {
+                    Button("Terms of Service") { showTerms = true }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.primary)
+                    Text("and").font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
+                    Button("Privacy Policy") { showPrivacy = true }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.primary)
+                }
+            }
+            .padding(.top, 16)
+            .padding(.bottom, 36)
+        }
+        .background(Theme.background)
+        .sheet(isPresented: $showTerms) { TermsOfServiceView() }
+        .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+    }
+
+    private func triggerAppleSignIn() {
+        isLoadingApple = true; errorMessage = nil
+        let nonce = AuthService.shared.generateAppleNonce()
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = nonce
+        let coordinator = AppleSignInCoordinator { result in
+            Task { @MainActor in
+                switch result {
+                case .success(let auth):
+                    do {
+                        try await AuthService.shared.signInWithApple(auth)
+                        isLoadingApple = false
+                        AnalyticsService.signIn(method: "apple")
+                        onSignedIn()
+                    } catch {
+                        isLoadingApple = false
+                        errorMessage = error.localizedDescription
+                    }
+                case .failure(let error):
+                    isLoadingApple = false
+                    if (error as? ASAuthorizationError)?.code != .canceled {
+                        errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
+        appleCoordinator = coordinator
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = coordinator
+        controller.presentationContextProvider = coordinator
+        controller.performRequests()
     }
 }
 
