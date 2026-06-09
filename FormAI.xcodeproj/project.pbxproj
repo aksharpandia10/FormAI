@@ -34,12 +34,11 @@
 		26F7AAAA2F9720B700DB466B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 26F7AAA92F9720B700DB466B /* GoogleSignIn */; };
 		26F7AAAC2F9720B700DB466B /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 26F7AAAB2F9720B700DB466B /* GoogleSignInSwift */; };
 		26F7AAAE2F97214500DB466B /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 26F7AAAD2F97214500DB466B /* FirebaseAnalytics */; };
+		AA1B2C3D2FB1000000AABBCC /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */; };
+		BB2C3D4E2FB2000000BBCCDD /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */; };
 		BB3F1A022F9E000000AABBCC /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3F1A012F9E000000AABBCC /* AuthService.swift */; };
 		BB3F1A062F9E000000AABBCC /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3F1A052F9E000000AABBCC /* SignInView.swift */; };
-		BB2C3D4E2FB2000000BBCCDD /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */; };
-		AA1B2C3D2FB1000000AABBCC /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */; };
 		CC3D4E5F2FC3000000CCDDEE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC3D4E602FC3000000CCDDEE /* PrivacyInfo.xcprivacy */; };
-		DD4E5F602FC4000000DDEEFF /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DD4E5F612FC4000000DDEEFF /* Products.storekit */; };
 		FF1A1A092FB0000000FFAABB /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0A2FB0000000FFAABB /* SubscriptionService.swift */; };
 		FF1A1A0B2FB0000000FFAABB /* SaveProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0C2FB0000000FFAABB /* SaveProgressView.swift */; };
 		FF1A1A0D2FB0000000FFAABB /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF1A1A0E2FB0000000FFAABB /* PaywallView.swift */; };
@@ -92,12 +91,12 @@
 		2629B3CE2F7AE32D00DFFDAD /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		2629B3E12F7AE32D00DFFDAD /* TutorialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
 		26C08F1B2FC38A2400BAAA5A /* FormAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FormAI.entitlements; sourceTree = "<group>"; };
-		26C08F1C2FC3929A00BAAA5A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		26C08F1C2FC3929A00BAAA5A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		26F7AAB52F9D1D0100DB466B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		BB3F1A012F9E000000AABBCC /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		BB3F1A052F9E000000AABBCC /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
-		BB2C3D4F2FB2000000BBCCDD /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
-		AA1B2C3E2FB1000000AABBCC /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		CC3D4E602FC3000000CCDDEE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DD4E5F612FC4000000DDEEFF /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		FF1A1A0A2FB0000000FFAABB /* SubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionService.swift; sourceTree = "<group>"; };
@@ -571,13 +570,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FormAI/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Form AI";
-				INFOPLIST_KEY_NSCameraUsageDescription = "AI Trainer uses your camera to analyze exercise form in real time. No video is recorded or transmitted.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "AI Trainer uses your microphone so you can ask the AI coach questions after your sets.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Form AI needs camera access to record your exercise so it can analyze your form.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Form AI uses the microphone during video recording of your exercise.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Form AI saves your recorded workout videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Form AI can save your workout recordings to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -585,9 +585,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.akshar.FormAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -605,13 +609,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FormAI/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Form AI";
-				INFOPLIST_KEY_NSCameraUsageDescription = "AI Trainer uses your camera to analyze exercise form in real time. No video is recorded or transmitted.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "AI Trainer uses your microphone so you can ask the AI coach questions after your sets.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Form AI needs camera access to record your exercise so it can analyze your form.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Form AI uses the microphone during video recording of your exercise.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Form AI saves your recorded workout videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Form AI can save your workout recordings to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -619,9 +624,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.akshar.FormAI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

@@ -7,7 +7,7 @@ DerivedData/
 *.xcscmblueprint
 
 # Firebase
-GoogleService-Info.plist
+# GoogleService-Info.plist
 
 # Python
 __pycache__/
@@ -20,7 +20,7 @@ eval/icons/
 .DS_Store
 
 # Large video files
-*.mp4
+
 *.mov
 
 # Proxy secrets and cache
