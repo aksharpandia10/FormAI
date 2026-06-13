@@ -87,11 +87,11 @@ class VideoRecorder: NSObject, ObservableObject {
     func teardown() {
         sessionQueue.async { [weak self] in
             guard let self else { return }
-            session.stopRunning()
-            session.beginConfiguration()
-            session.inputs.forEach { session.removeInput($0) }
-            session.outputs.forEach { session.removeOutput($0) }
-            session.commitConfiguration()
+            self.session.stopRunning()
+            self.session.beginConfiguration()
+            self.session.inputs.forEach { self.session.removeInput($0) }
+            self.session.outputs.forEach { self.session.removeOutput($0) }
+            self.session.commitConfiguration()
             currentVideoInput = nil
         }
         durationTimer?.invalidate()
