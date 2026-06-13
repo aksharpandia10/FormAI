@@ -154,7 +154,16 @@ struct ExerciseDetailView: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            RevenueCatUI.PaywallView()
+            ZStack(alignment: .bottom) {
+                RevenueCatUI.PaywallView()
+                HStack(spacing: 16) {
+                    Link("Terms of Use", destination: URL(string: "https://aksharpandia10.github.io/FormAI/terms.html")!)
+                    Link("Privacy Policy", destination: URL(string: "https://aksharpandia10.github.io/FormAI/privacy.html")!)
+                }
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 12)
+            }
         }
         .fullScreenCover(isPresented: $showRecordingTip) {
             RecordingTipView(exercise: exercise) {
