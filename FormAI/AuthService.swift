@@ -1,6 +1,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 import GoogleSignIn
 import AuthenticationServices
 import CryptoKit
@@ -43,6 +44,17 @@ class AuthService: ObservableObject {
     func signOut() throws {
         GIDSignIn.sharedInstance.signOut()
         try Auth.auth().signOut()
+    }
+
+    func deleteAccount() async throws {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let user = Auth.auth().currentUser else { return }
+        let db = Firestore.firestore()
+        let snap = try await db.collection("users").document(uid).collection("formChecks").getDocuments()
+        for doc in snap.documents { try await doc.reference.delete() }
+        try await db.collection("users").document(uid).delete()
+        GIDSignIn.sharedInstance.signOut()
+        try await user.delete()
     }
 
     // MARK: - Apple Sign-In

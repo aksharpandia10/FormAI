@@ -6,6 +6,9 @@ struct FormAISettingsView: View {
     @StateObject private var auth = AuthService.shared
     @StateObject private var sub = SubscriptionService.shared
     @State private var showSignOutConfirm = false
+    @State private var showDeleteConfirm = false
+    @State private var showDeleteError = false
+    @State private var isDeleting = false
     @State private var showCustomerCenter = false
     @State private var showPaywall = false
     @State private var showTerms = false
@@ -95,6 +98,24 @@ struct FormAISettingsView: View {
                         }
                         .padding(18)
                     }
+
+                    Divider().padding(.leading, 18)
+
+                    Button { showDeleteConfirm = true } label: {
+                        HStack {
+                            Image(systemName: "trash")
+                                .foregroundStyle(.red)
+                            Text("Delete Account")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.red)
+                            Spacer()
+                            if isDeleting {
+                                ProgressView().tint(.red)
+                            }
+                        }
+                        .padding(18)
+                    }
+                    .disabled(isDeleting)
                 }
                 // MARK: Legal
                 sectionHeader("Legal")
@@ -145,6 +166,29 @@ struct FormAISettingsView: View {
                 onSignOut?()
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog("Delete Account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete Account", role: .destructive) {
+                isDeleting = true
+                Task {
+                    do {
+                        try await auth.deleteAccount()
+                        UserDefaults.standard.set(false, forKey: "formAI_hasCompletedOnboarding")
+                        onSignOut?()
+                    } catch {
+                        showDeleteError = true
+                    }
+                    isDeleting = false
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete your account and all form check history. This cannot be undone.")
+        }
+        .alert("Unable to Delete Account", isPresented: $showDeleteError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please sign out and sign back in, then try again.")
         }
         .sheet(isPresented: $showCustomerCenter) {
             CustomerCenterView()
