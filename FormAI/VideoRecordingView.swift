@@ -127,11 +127,6 @@ struct VideoRecordingView: View {
                                 Task { await analyze(videoURL: url) }
                             }
                         } else {
-                            recorder.onAutoStop = { url in
-                                guard let url else { return }
-                                saveVideoToLibrary(url)
-                                Task { await analyze(videoURL: url) }
-                            }
                             recorder.startRecording()
                         }
                     } label: {

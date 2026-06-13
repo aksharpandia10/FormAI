@@ -7,8 +7,6 @@ class VideoRecorder: NSObject, ObservableObject {
     @Published var formattedDuration: String = "0:00"
     @Published var isFrontCamera = false
 
-    var onAutoStop: ((URL?) -> Void)?
-    private let maxRecordingDuration: TimeInterval = 10
 
     let session = AVCaptureSession()
     private var movieOutput = AVCaptureMovieFileOutput()
@@ -118,9 +116,6 @@ class VideoRecorder: NSObject, ObservableObject {
                 let mins = Int(duration) / 60
                 let secs = Int(duration) % 60
                 formattedDuration = String(format: "%d:%02d", mins, secs)
-                if duration >= maxRecordingDuration {
-                    stopRecording(completion: onAutoStop ?? { _ in })
-                }
             }
         }
     }
