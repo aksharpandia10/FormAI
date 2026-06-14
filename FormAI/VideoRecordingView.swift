@@ -142,7 +142,7 @@ struct VideoRecordingView: View {
                     }
 
                     if recorder.isRecording {
-                        Text("\(10 - Int(recorder.duration))s left")
+                        Text(recorder.formattedDuration)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.white.opacity(0.8))
                     } else {
@@ -342,7 +342,7 @@ struct RecordingTipView: View {
                 Spacer().frame(height: 36)
 
                 VStack(spacing: 0) {
-                    TipRow(icon: "timer", text: "Keep it under 15 seconds")
+                    TipRow(icon: "timer", text: "Record 1–3 complete reps")
                     Divider().background(.white.opacity(0.1))
                     TipRow(icon: "arrow.triangle.2.circlepath", text: "Show 1–2 complete reps")
                     Divider().background(.white.opacity(0.1))
