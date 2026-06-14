@@ -141,11 +141,7 @@ struct VideoRecordingView: View {
                         }
                     }
 
-                    if recorder.isRecording {
-                        Text(recorder.formattedDuration)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.8))
-                    } else {
+                    if !recorder.isRecording {
                         PhotosPicker(selection: $pickerItem, matching: .videos) {
                             Label("Choose from Library", systemImage: "photo.on.rectangle")
                                 .font(.system(size: 14, weight: .semibold))
