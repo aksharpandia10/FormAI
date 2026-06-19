@@ -60,6 +60,13 @@ enum AnalyticsService {
         ])
     }
 
+    static func onboardingAnswered(step: String, answer: String) {
+        Analytics.logEvent("onboarding_answered", parameters: [
+            "step": step,
+            "answer": answer
+        ])
+    }
+
     static func paywallShown(source: String) {
         Analytics.logEvent("paywall_shown", parameters: ["source": source])
     }

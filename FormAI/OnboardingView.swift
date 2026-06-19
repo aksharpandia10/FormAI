@@ -144,39 +144,52 @@ struct FormAIOnboardingView: View {
     private var genderStep: some View {
         OBStep(title: "What's your gender?", subtitle: "Helps calibrate your coaching feedback.",
                options: ["Male", "Female", "Non-binary", "Prefer not to say"]) { sel in
-            data.gender = sel.first ?? ""; next()
+            data.gender = sel.first ?? ""
+            AnalyticsService.onboardingAnswered(step: "gender", answer: data.gender)
+            next()
         }
     }
 
     private var workoutsStep: some View {
         OBStep(title: "How often do you train?", subtitle: "Per week on average.",
                options: ["1-2x per week", "3-4x per week", "5-6x per week", "Every day"]) { sel in
-            data.workoutsPerWeek = sel.first ?? ""; next()
+            data.workoutsPerWeek = sel.first ?? ""
+            AnalyticsService.onboardingAnswered(step: "training_frequency", answer: data.workoutsPerWeek)
+            next()
         }
     }
 
     private var birthYearStep: some View {
-        AgeStep(age: $data.age, onNext: next)
+        AgeStep(age: $data.age, onNext: {
+            AnalyticsService.onboardingAnswered(step: "age", answer: "\(data.age)")
+            next()
+        })
     }
 
     private var heardFromStep: some View {
         OBStep(title: "How did you find us?", subtitle: "",
                options: ["TikTok / Instagram", "A friend", "App Store", "Google / YouTube", "Other"]) { sel in
-            data.heardFrom = sel.first ?? ""; next()
+            data.heardFrom = sel.first ?? ""
+            AnalyticsService.onboardingAnswered(step: "heard_from", answer: data.heardFrom)
+            next()
         }
     }
 
     private var triedAppsStep: some View {
         OBStep(title: "Tried other form checking apps?", subtitle: "",
                options: ["Yes, and loved it", "Yes, wasn't impressed", "No, first time"]) { sel in
-            data.triedOtherApps = sel.first ?? ""; next()
+            data.triedOtherApps = sel.first ?? ""
+            AnalyticsService.onboardingAnswered(step: "tried_apps", answer: data.triedOtherApps)
+            next()
         }
     }
 
     private var trainerStep: some View {
         OBStep(title: "Do you work with a trainer?", subtitle: "",
                options: ["Yes, currently", "Used to, not anymore", "Never had one"]) { sel in
-            data.hasTrainer = sel.first ?? ""; next()
+            data.hasTrainer = sel.first ?? ""
+            AnalyticsService.onboardingAnswered(step: "has_trainer", answer: data.hasTrainer)
+            next()
         }
     }
 
@@ -185,7 +198,9 @@ struct FormAIOnboardingView: View {
                options: ["Fear of injury", "Not seeing progress", "Unsure if my form is right",
                          "Can't afford a trainer", "Training alone with no feedback"],
                multiSelect: true) { sel in
-            data.stoppingPoints = sel; next()
+            data.stoppingPoints = sel
+            AnalyticsService.onboardingAnswered(step: "stopping_points", answer: sel.joined(separator: ", "))
+            next()
         }
     }
 
@@ -195,6 +210,7 @@ struct FormAIOnboardingView: View {
                          "Improve my technique"],
                multiSelect: true) { sel in
             data.goals = sel
+            AnalyticsService.onboardingAnswered(step: "goals", answer: sel.joined(separator: ", "))
             next()
         }
     }
