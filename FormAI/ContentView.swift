@@ -66,6 +66,7 @@ struct ContentView: View {
                     onSignedIn: {
                         AnalyticsService.onboardingCompleted()
                         UserDefaults.standard.set(true, forKey: "formAI_hasCompletedOnboarding")
+                        Task { await FormAIOnboardingData.uploadPendingDataIfNeeded() }
                         withAnimation(.easeInOut(duration: 0.4)) { appState = .launching }
                     },
                     onSkip: {

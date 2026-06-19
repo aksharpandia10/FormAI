@@ -14,29 +14,36 @@ class FormAIOnboardingData: ObservableObject {
     @Published var goals: [String] = []
 
     func save() {
-        UserDefaults.standard.set(name, forKey: "ob_name")
-        UserDefaults.standard.set(gender, forKey: "ob_gender")
-        UserDefaults.standard.set(workoutsPerWeek, forKey: "ob_workouts")
-        UserDefaults.standard.set(age, forKey: "ob_age")
-        UserDefaults.standard.set(hasTrainer, forKey: "ob_trainer")
-        saveToFirestore()
+        let defaults = UserDefaults.standard
+        defaults.set(name, forKey: "ob_name")
+        defaults.set(gender, forKey: "ob_gender")
+        defaults.set(workoutsPerWeek, forKey: "ob_workouts")
+        defaults.set(age, forKey: "ob_age")
+        defaults.set(hasTrainer, forKey: "ob_trainer")
+        defaults.set(heardFrom, forKey: "ob_heardFrom")
+        defaults.set(triedOtherApps, forKey: "ob_triedOtherApps")
+        defaults.set(stoppingPoints, forKey: "ob_stoppingPoints")
+        defaults.set(goals, forKey: "ob_goals")
+        defaults.set(Date().timeIntervalSince1970, forKey: "ob_completedAt")
     }
 
-    private func saveToFirestore() {
+    static func uploadPendingDataIfNeeded() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
+        let defaults = UserDefaults.standard
+        guard defaults.object(forKey: "ob_completedAt") != nil else { return }
         let data: [String: Any] = [
-            "name": name,
-            "gender": gender,
-            "workoutsPerWeek": workoutsPerWeek,
-            "age": age,
-            "heardFrom": heardFrom,
-            "triedOtherApps": triedOtherApps,
-            "hasTrainer": hasTrainer,
-            "stoppingPoints": stoppingPoints,
-            "goals": goals,
-            "completedAt": Date().timeIntervalSince1970
+            "name": defaults.string(forKey: "ob_name") ?? "",
+            "gender": defaults.string(forKey: "ob_gender") ?? "",
+            "workoutsPerWeek": defaults.string(forKey: "ob_workouts") ?? "",
+            "age": defaults.integer(forKey: "ob_age"),
+            "heardFrom": defaults.string(forKey: "ob_heardFrom") ?? "",
+            "triedOtherApps": defaults.string(forKey: "ob_triedOtherApps") ?? "",
+            "hasTrainer": defaults.string(forKey: "ob_trainer") ?? "",
+            "stoppingPoints": defaults.stringArray(forKey: "ob_stoppingPoints") ?? [],
+            "goals": defaults.stringArray(forKey: "ob_goals") ?? [],
+            "completedAt": defaults.double(forKey: "ob_completedAt")
         ]
-        Firestore.firestore()
+        try? await Firestore.firestore()
             .collection("users").document(uid)
             .setData(["onboarding": data], merge: true)
     }
