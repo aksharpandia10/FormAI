@@ -21,6 +21,14 @@ struct ExerciseDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
 
+                // Title
+                Text(exercise.name)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+
                 // Metadata tags
                 HStack(spacing: 8) {
                     chip(exercise.equipment, color: Theme.primary)
@@ -127,7 +135,7 @@ struct ExerciseDetailView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(exercise.name)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
