@@ -340,7 +340,7 @@ struct RecordingTipView: View {
                 VStack(spacing: 0) {
                     TipRow(icon: "timer", text: "Record 1–3 complete reps")
                     Divider().background(.white.opacity(0.1))
-                    TipRow(icon: "arrow.triangle.2.circlepath", text: "Show 1–2 complete reps")
+                    TipRow(icon: "iphone.gen3", text: "Keep the camera steady")
                     Divider().background(.white.opacity(0.1))
                     TipRow(icon: "video.fill", text: "Film from \(exercise.cameraAngle.rawValue.lowercased()) view")
                     Divider().background(.white.opacity(0.1))
