@@ -153,6 +153,27 @@ struct FormAISettingsView: View {
                     }
                 }
 
+                #if DEBUG
+                // MARK: Developer (DEBUG only)
+                sectionHeader("Developer")
+                cardGroup {
+                    NavigationLink(destination: MarketingGalleryView()) {
+                        HStack {
+                            Image(systemName: "camera.viewfinder")
+                                .foregroundStyle(Theme.primary)
+                            Text("Marketing Screenshots")
+                                .font(.system(size: 15))
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                        .padding(18)
+                    }
+                }
+                #endif
+
             }
             .padding(24)
         }
@@ -217,3 +238,102 @@ struct FormAISettingsView: View {
             .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 }
+
+#if DEBUG
+// MARK: - Marketing Screenshot Gallery (DEBUG only)
+//
+// Hidden tool for generating marketing screenshots of the form analysis
+// screen with mock data. Never compiled into Release builds. Reachable from
+// Settings → Developer → Marketing Screenshots. No user data is written
+// (skipSave: true) and no names appear anywhere.
+
+struct MarketingGalleryView: View {
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(ExerciseLibrary.all) { exercise in
+                    HStack(spacing: 12) {
+                        Text(exercise.name)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        Spacer()
+                        NavigationLink(value: MarketingTarget(exercise: exercise, score: 95)) {
+                            marketingScorePill(95, color: Color(hex: "#22C55E"))
+                        }
+                        NavigationLink(value: MarketingTarget(exercise: exercise, score: 54)) {
+                            marketingScorePill(54, color: Color(hex: "#F59E0B"))
+                        }
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    Divider().padding(.leading, 18)
+                }
+            }
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .navigationTitle("Marketing Screenshots")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: MarketingTarget.self) { target in
+            FormCheckResultView(
+                result: MarketingMock.result(for: target.exercise, score: target.score),
+                skipSave: true,
+                onDone: {}
+            )
+        }
+    }
+
+    private func marketingScorePill(_ score: Int, color: Color) -> some View {
+        Text("\(score)")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(color)
+            .frame(width: 44, height: 32)
+            .background(color.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+struct MarketingTarget: Hashable {
+    let exercise: Exercise
+    let score: Int
+}
+
+enum MarketingMock {
+    static func result(for exercise: Exercise, score: Int) -> FormCheckResult {
+        let entry: FormCheckEntry
+        if score >= 80 {
+            entry = FormCheckEntry(
+                exerciseId: exercise.id,
+                exerciseName: exercise.name,
+                score: score,
+                didWell: [
+                    "Strong, stable setup before every rep",
+                    "Consistent path through the full range of motion",
+                    "Great depth with no loss of tension at the bottom",
+                    "Smooth, controlled tempo on the way down"
+                ],
+                improve: [
+                    "Brace your core a touch harder at the top to fully lock in the position (frame 8)"
+                ],
+                summary: "Excellent control and textbook positioning throughout. Just one small refinement to make it perfect."
+            )
+        } else {
+            entry = FormCheckEntry(
+                exerciseId: exercise.id,
+                exerciseName: exercise.name,
+                score: score,
+                didWell: [
+                    "Solid starting stance and grip width",
+                    "Kept a steady rhythm across your reps"
+                ],
+                improve: [
+                    "Keep your spine neutral — you're rounding under load (frame 4)",
+                    "Drive through your heels instead of shifting onto your toes (frame 6)",
+                    "Control the descent; you're dropping too fast to stay tight (frame 9)"
+                ],
+                summary: "Some solid fundamentals here, but a few positioning issues are costing you tension and putting stress on the wrong areas."
+            )
+        }
+        return FormCheckResult(exercise: exercise, entry: entry)
+    }
+}
+#endif
