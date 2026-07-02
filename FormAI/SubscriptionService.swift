@@ -6,7 +6,7 @@ class SubscriptionService: ObservableObject {
     static let shared = SubscriptionService()
 
     #if DEBUG
-    @Published var isSubscribed = true
+    @Published var isSubscribed = false
     #else
     @Published var isSubscribed = false
     #endif

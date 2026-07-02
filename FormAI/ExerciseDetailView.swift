@@ -1,5 +1,4 @@
 import SwiftUI
-import RevenueCatUI
 
 struct ExerciseDetailView: View {
     let exercise: Exercise
@@ -8,14 +7,12 @@ struct ExerciseDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var history: [FormCheckEntry] = []
     @State private var showTutorial = false
-    @State private var showPaywall = false
     @State private var navigateToRecording = false
     @State private var historyExpanded = true
     @State private var historyLoadFailed = false
     @State private var showRecordingTip = false
     @State private var selectedHistoryEntry: FormCheckEntry? = nil
     @State private var showHistoryResult = false
-    @StateObject private var sub = SubscriptionService.shared
 
     var body: some View {
         ScrollView {
@@ -40,8 +37,7 @@ struct ExerciseDetailView: View {
                 // Check Form CTA
                 Button {
                     AnalyticsService.formCheckTapped(exerciseId: exercise.id, exerciseName: exercise.name)
-                    if sub.isSubscribed { showRecordingTip = true }
-                    else { showPaywall = true; AnalyticsService.paywallShown(source: "exercise_detail") }
+                    showRecordingTip = true
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "video.fill")
@@ -70,7 +66,9 @@ struct ExerciseDetailView: View {
                             .font(.system(size: 14))
                             .foregroundStyle(Theme.textSecondary)
                         Spacer()
-                        Button("Retry") { Task { await loadHistory() } }
+                        Button("Retry") {
+                            Task { @MainActor in await loadHistory() }
+                        }
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Theme.primary)
                     }
@@ -161,21 +159,13 @@ struct ExerciseDetailView: View {
                 )
             }
         }
-        .sheet(isPresented: $showPaywall) {
-            RevenueCatUI.PaywallView()
-        }
         .fullScreenCover(isPresented: $showRecordingTip) {
             RecordingTipView(exercise: exercise) {
                 showRecordingTip = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(500))
                     navigateToRecording = true
                 }
-            }
-        }
-        .onChange(of: sub.isSubscribed) { _, isSubscribed in
-            if isSubscribed {
-                showPaywall = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { showRecordingTip = true }
             }
         }
         .task {
@@ -185,7 +175,7 @@ struct ExerciseDetailView: View {
     }
 
     private func loadHistory() async {
-        let cached = FormCheckHistoryService.shared.cachedHistory(for: exercise.id)
+        let cached = await FormCheckHistoryService.shared.cachedHistory(for: exercise.id)
         if !cached.isEmpty { history = cached }
         do {
             history = try await FormCheckHistoryService.shared.loadHistory(for: exercise.id)

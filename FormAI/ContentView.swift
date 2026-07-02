@@ -1,4 +1,5 @@
 import SwiftUI
+import RevenueCatUI
 
 enum AppState {
     case loading
@@ -6,11 +7,13 @@ enum AppState {
     case onboarding
     case signIn
     case launching  // fun loading screen before home
+    case paywall    // hard gate — must subscribe to proceed
     case home
 }
 
 struct ContentView: View {
     @StateObject private var auth = AuthService.shared
+    @StateObject private var sub = SubscriptionService.shared
     @State private var appState: AppState = .loading
     @State private var onboardingReturnStep = 0
     @State private var showSignInSheet = false
@@ -76,15 +79,27 @@ struct ContentView: View {
                         withAnimation(.easeInOut(duration: 0.4)) { appState = .launching }
                     },
                     onBack: {
-                        onboardingReturnStep = 8
+                        onboardingReturnStep = 11
                         withAnimation(.easeInOut(duration: 0.3)) { appState = .onboarding }
                     }
                 )
 
             case .launching:
                 LaunchLoadingView {
-                    withAnimation(.easeInOut(duration: 0.5)) { appState = .home }
+                    if sub.isSubscribed {
+                        withAnimation(.easeInOut(duration: 0.5)) { appState = .home }
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.5)) { appState = .paywall }
+                    }
                 }
+
+            case .paywall:
+                RevenueCatUI.PaywallView()
+                    .onChange(of: sub.isSubscribed) { _, isSubscribed in
+                        if isSubscribed {
+                            withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
+                        }
+                    }
 
             case .home:
                 ExerciseHomeView(onSignOut: {
@@ -102,11 +117,11 @@ struct ContentView: View {
     }
 
     private func checkState() {
-        if auth.user != nil || hasCompletedOnboarding {
-            appState = .home
-        } else {
+        guard auth.user != nil || hasCompletedOnboarding else {
             appState = .intro
+            return
         }
+        appState = sub.isSubscribed ? .home : .paywall
     }
 }
 
@@ -115,60 +130,151 @@ struct ContentView: View {
 struct LaunchLoadingView: View {
     let onComplete: () -> Void
 
-    private let messages: [(emoji: String, text: String)] = [
-        ("🏋️", "Getting your coaching ready..."),
-        ("🔬", "Loading exercise library..."),
-        ("🧠", "Warming up the AI coach..."),
-        ("📊", "Setting up your analytics..."),
-        ("✅", "Almost ready..."),
-    ]
+    @State private var percentage = 0
+    @State private var statusIndex = 0
+    @State private var checkedItems: Set<Int> = []
 
-    @State private var messageIndex = 0
-    @State private var opacity = 1.0
+    private let statusMessages = [
+        "Personalizing coaching cues...",
+        "Loading exercise library...",
+        "Calibrating AI analysis...",
+        "Building your profile...",
+        "Almost ready..."
+    ]
+    private let checklistItems = [
+        "Personalized coaching cues",
+        "Exercise library",
+        "AI form analysis",
+        "Your profile"
+    ]
+    private let checkThresholds = [22, 48, 70, 88]
 
     var body: some View {
         ZStack {
             Theme.background.ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: 0) {
                 Spacer()
 
-                Text("Form AI")
-                    .font(.system(size: 42, weight: .black, design: .rounded))
-                    .foregroundStyle(Theme.primary)
+                Text("\(percentage)%")
+                    .font(.system(size: 72, weight: .bold, design: .rounded))
+                    .foregroundStyle(Theme.textPrimary)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .animation(.linear(duration: 0.08), value: percentage)
 
-                VStack(spacing: 12) {
-                    Text(messages[messageIndex].emoji)
-                        .font(.system(size: 40))
-                        .opacity(opacity)
+                Spacer().frame(height: 10)
 
-                    Text(messages[messageIndex].text)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(Theme.textSecondary)
-                        .opacity(opacity)
-                        .animation(.easeInOut(duration: 0.3), value: messageIndex)
+                Text("We're building your profile")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Spacer().frame(height: 28)
+
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Theme.cardBackground)
+                            .frame(height: 8)
+                        Capsule()
+                            .fill(LinearGradient(
+                                colors: [Theme.primary, Theme.primary.opacity(0.55)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ))
+                            .frame(width: geo.size.width * CGFloat(percentage) / 100.0, height: 8)
+                            .animation(.linear(duration: 0.08), value: percentage)
+                    }
                 }
-                .frame(height: 100)
+                .frame(height: 8)
+                .padding(.horizontal, 24)
 
-                ProgressView()
-                    .tint(Theme.primary)
-                    .scaleEffect(1.2)
+                Spacer().frame(height: 12)
+
+                Text(statusMessages[statusIndex])
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textSecondary)
+                    .id(statusIndex)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+
+                Spacer().frame(height: 36)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Setting up your experience")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .kerning(0.5)
+                        .padding(.horizontal, 18)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
+
+                    ForEach(Array(checklistItems.enumerated()), id: \.offset) { i, item in
+                        HStack {
+                            Text("· \(item)")
+                                .font(.system(size: 15))
+                                .foregroundStyle(Theme.textPrimary)
+                            Spacer()
+                            if checkedItems.contains(i) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(Theme.primary)
+                                    .font(.system(size: 20))
+                                    .transition(.scale.combined(with: .opacity))
+                            }
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 13)
+
+                        if i < checklistItems.count - 1 {
+                            Divider().padding(.leading, 18)
+                        }
+                    }
+                    .padding(.bottom, 4)
+                }
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal, 24)
 
                 Spacer()
             }
         }
-        .task {
-            let interval: UInt64 = 1_400_000_000
-            for i in 1..<messages.count {
-                try? await Task.sleep(nanoseconds: interval)
-                withAnimation(.easeInOut(duration: 0.3)) { opacity = 0 }
-                try? await Task.sleep(nanoseconds: 300_000_000)
-                messageIndex = i
-                withAnimation(.easeInOut(duration: 0.3)) { opacity = 1 }
+        .task { await runProgress() }
+    }
+
+    private func runProgress() async {
+        let totalDuration: Double = 4.2
+        let steps = 100
+        let stepDuration = UInt64((totalDuration / Double(steps)) * 1_000_000_000)
+
+        for i in 1...steps {
+            try? await Task.sleep(nanoseconds: stepDuration)
+
+            withAnimation { percentage = i }
+
+            let newStatus: Int
+            switch i {
+            case ..<25: newStatus = 0
+            case ..<50: newStatus = 1
+            case ..<72: newStatus = 2
+            case ..<90: newStatus = 3
+            default:    newStatus = 4
             }
-            try? await Task.sleep(nanoseconds: interval)
-            onComplete()
+            if newStatus != statusIndex {
+                withAnimation { statusIndex = newStatus }
+            }
+
+            for (j, threshold) in checkThresholds.enumerated() {
+                if i >= threshold && !checkedItems.contains(j) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                        checkedItems.insert(j)
+                    }
+                }
+            }
         }
+
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        onComplete()
     }
 }
 
