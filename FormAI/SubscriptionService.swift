@@ -69,6 +69,26 @@ class SubscriptionService: ObservableObject {
         isSubscribed = info.entitlements[entitlementID]?.isActive == true
     }
 
+    func login(userId: String) async {
+        do {
+            let (info, _) = try await Purchases.shared.logIn(userId)
+            #if !DEBUG
+            isSubscribed = info.entitlements[entitlementID]?.isActive == true
+            #endif
+        } catch {
+            print("[RC] login failed: \(error)")
+        }
+    }
+
+    func logout() async {
+        isSubscribed = false
+        do {
+            _ = try await Purchases.shared.logOut()
+        } catch {
+            print("[RC] logout failed: \(error)")
+        }
+    }
+
     // MARK: - Display prices (fall back to hardcoded until offerings load)
 
     var yearlyDisplayPrice: String  { offerings?.current?.annual?.localizedPriceString ?? "$39.99" }

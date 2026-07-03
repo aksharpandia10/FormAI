@@ -109,9 +109,14 @@ struct ContentView: View {
         }
         .onAppear { checkState() }
         .onChange(of: auth.user) { _, user in
-            if user == nil && appState == .home {
-                UserDefaults.standard.set(false, forKey: "formAI_hasCompletedOnboarding")
-                withAnimation { appState = .intro }
+            if let user = user {
+                Task { await sub.login(userId: user.uid) }
+            } else {
+                Task { await sub.logout() }
+                if appState == .home {
+                    UserDefaults.standard.set(false, forKey: "formAI_hasCompletedOnboarding")
+                    withAnimation { appState = .intro }
+                }
             }
         }
         .onChange(of: sub.isSubscribed) { _, isSubscribed in
@@ -126,7 +131,14 @@ struct ContentView: View {
             appState = .intro
             return
         }
-        appState = sub.isSubscribed ? .home : .paywall
+        if let uid = auth.user?.uid {
+            Task {
+                await sub.login(userId: uid)
+                appState = sub.isSubscribed ? .home : .paywall
+            }
+        } else {
+            appState = sub.isSubscribed ? .home : .paywall
+        }
     }
 }
 
