@@ -114,6 +114,11 @@ struct ContentView: View {
                 withAnimation { appState = .intro }
             }
         }
+        .onChange(of: sub.isSubscribed) { _, isSubscribed in
+            if !isSubscribed && appState == .home {
+                withAnimation(.easeInOut(duration: 0.4)) { appState = .paywall }
+            }
+        }
     }
 
     private func checkState() {
