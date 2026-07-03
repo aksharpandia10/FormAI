@@ -94,7 +94,7 @@ struct ContentView: View {
                 }
 
             case .paywall:
-                RevenueCatUI.PaywallView()
+                RevenueCatUI.PaywallView(configuration: .init(displayCloseButton: false))
                     .onChange(of: sub.isSubscribed) { _, isSubscribed in
                         if isSubscribed {
                             withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
