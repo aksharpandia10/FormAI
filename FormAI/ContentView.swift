@@ -22,6 +22,10 @@ struct ContentView: View {
         UserDefaults.standard.bool(forKey: "formAI_hasCompletedOnboarding")
     }
 
+    private var isFirstLaunchAfterInstall: Bool {
+        !UserDefaults.standard.bool(forKey: "formAI_hasLaunchedBefore")
+    }
+
     var body: some View {
         Group {
             switch appState {
@@ -94,7 +98,10 @@ struct ContentView: View {
                 }
 
             case .paywall:
-                RevenueCatUI.PaywallView(displayCloseButton: false)
+                RevenueCatUI.PaywallView(displayCloseButton: true)
+                    .onDismiss {
+                        withAnimation(.easeInOut(duration: 0.4)) { appState = .intro }
+                    }
                     .onChange(of: sub.isSubscribed) { _, isSubscribed in
                         if isSubscribed {
                             withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
@@ -107,7 +114,13 @@ struct ContentView: View {
                 })
             }
         }
-        .onAppear { checkState() }
+        .onAppear {
+            if isFirstLaunchAfterInstall {
+                UserDefaults.standard.set(true, forKey: "formAI_hasLaunchedBefore")
+                try? AuthService.shared.signOut()
+            }
+            checkState()
+        }
         .onChange(of: auth.user) { _, user in
             if let user = user {
                 Task { await sub.login(userId: user.uid) }
