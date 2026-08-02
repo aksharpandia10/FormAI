@@ -98,25 +98,12 @@ struct ContentView: View {
                 }
 
             case .paywall:
-                ZStack(alignment: .topLeading) {
-                    RevenueCatUI.PaywallView(displayCloseButton: false)
-                        .onChange(of: sub.isSubscribed) { _, isSubscribed in
-                            if isSubscribed {
-                                withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
-                            }
+                RevenueCatUI.PaywallView(displayCloseButton: false)
+                    .onChange(of: sub.isSubscribed) { _, isSubscribed in
+                        if isSubscribed {
+                            withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
                         }
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.4)) { appState = .intro }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .padding(10)
-                            .background(.ultraThinMaterial, in: Circle())
                     }
-                    .padding(.top, 56)
-                    .padding(.leading, 20)
-                }
 
             case .home:
                 ExerciseHomeView(onSignOut: {
