@@ -7,7 +7,6 @@ enum AppState {
     case onboarding
     case signIn
     case launching  // fun loading screen before home
-    case paywall    // hard gate — must subscribe to proceed
     case home
 }
 
@@ -17,6 +16,7 @@ struct ContentView: View {
     @State private var appState: AppState = .loading
     @State private var onboardingReturnStep = 0
     @State private var showSignInSheet = false
+    @State private var showPaywall = false
 
     private var hasCompletedOnboarding: Bool {
         UserDefaults.standard.bool(forKey: "formAI_hasCompletedOnboarding")
@@ -93,23 +93,25 @@ struct ContentView: View {
                     if sub.isSubscribed {
                         withAnimation(.easeInOut(duration: 0.5)) { appState = .home }
                     } else {
-                        withAnimation(.easeInOut(duration: 0.5)) { appState = .paywall }
+                        appState = .intro
+                        showPaywall = true
                     }
                 }
-
-            case .paywall:
-                RevenueCatUI.PaywallView(displayCloseButton: false)
-                    .onChange(of: sub.isSubscribed) { _, isSubscribed in
-                        if isSubscribed {
-                            withAnimation(.easeInOut(duration: 0.4)) { appState = .home }
-                        }
-                    }
 
             case .home:
                 ExerciseHomeView(onSignOut: {
                     withAnimation(.easeInOut(duration: 0.4)) { appState = .intro }
                 })
             }
+        }
+        .fullScreenCover(isPresented: $showPaywall) {
+            RevenueCatUI.PaywallView()
+                .onChange(of: sub.isSubscribed) { _, isSubscribed in
+                    if isSubscribed {
+                        showPaywall = false
+                        appState = .home
+                    }
+                }
         }
         .onAppear {
             if isFirstLaunchAfterInstall {
@@ -131,7 +133,7 @@ struct ContentView: View {
         }
         .onChange(of: sub.isSubscribed) { _, isSubscribed in
             if !isSubscribed && appState == .home {
-                withAnimation(.easeInOut(duration: 0.4)) { appState = .paywall }
+                showPaywall = true
             }
         }
     }
@@ -144,10 +146,20 @@ struct ContentView: View {
         if let uid = auth.user?.uid {
             Task {
                 await sub.login(userId: uid)
-                appState = sub.isSubscribed ? .home : .paywall
+                if sub.isSubscribed {
+                    appState = .home
+                } else {
+                    appState = .intro
+                    showPaywall = true
+                }
             }
         } else {
-            appState = sub.isSubscribed ? .home : .paywall
+            if sub.isSubscribed {
+                appState = .home
+            } else {
+                appState = .intro
+                showPaywall = true
+            }
         }
     }
 }
